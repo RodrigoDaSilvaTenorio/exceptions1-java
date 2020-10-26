@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import Exceptions.DomainException;
+
 public class Reservation {
 	private Integer roomNumber;
 	private Date checkin;
@@ -11,7 +13,11 @@ public class Reservation {
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-	public Reservation(Integer room, Date checkin, Date checkout) {
+	public Reservation(Integer room, Date checkin, Date checkout) throws DomainException {
+		
+		if (!checkout.after(checkin)) {
+			throw new DomainException("Check-in DATE must be inferior a check-out DATE:");
+		}
 		this.roomNumber = room;
 		this.checkin = checkin;
 		this.checkout = checkout;
@@ -39,27 +45,23 @@ public class Reservation {
 		return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 	}
 
-	public String updateDates(Date checkIn, Date checkOut) {
+	public void updateDates(Date checkIn, Date checkOut) throws DomainException {
 		Date now = new Date();
-		
+
 		if (checkIn.before(now) || checkOut.before(now)) {
-			return "Only future dates, please!!";
-		} 
+			throw new DomainException("Only future dates, please!!");
+		}
 		if (!checkOut.after(checkIn)) {
-			return "Check-in DATE must be inferior a check-out DATE:";
-			}
-		
+			throw new DomainException("Check-in DATE must be inferior a check-out DATE:");
+		}
+
 		this.checkin = checkIn;
 		this.checkout = checkOut;
-
-		return null;
 	}
 
 	@Override
 	public String toString() {
-		return "Room " + roomNumber 
-				+ ", Check-In: " + sdf.format(checkin) 
-				+ ", Check-Out: " + sdf.format(checkout)
+		return "Room " + roomNumber + ", Check-In: " + sdf.format(checkin) + ", Check-Out: " + sdf.format(checkout)
 				+ ", " + duration() + " night/s";
 	}
 
